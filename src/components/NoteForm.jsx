@@ -1,53 +1,81 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { ArrowUturnLeftIcon } from "@heroicons/react/24/solid";
-import { Link, Navigate } from "react-router-dom";
+import { Link, Navigate, useParams } from "react-router-dom";
 import { Formik, Field, Form } from "formik";
 import * as Yup from "yup";
 import StyledErrorMessage from "./StyledErrorMessage";
 import { ToastContainer, Bounce } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 
-const NoteFormSchema = Yup.object({
-  title: Yup.string()
-    .min(5, "Title is too short!")
-    .max(30, "Title is too long bby!")
-    .required("Enter a title!"),
-  content: Yup.string()
-    .min(5, "Content is too short bby!")
-    .required("Enter a Content!"),
-});
-
 const NoteForm = ({ isCreate }) => {
   const [redirect, setRedirect] = useState(false);
-  const initialValues = {
-    title: "",
-    content: "",
+  const [oldNote, setOldNote] = useState({});
+
+  const { id } = useParams();
+
+  const getOldNote = async () => {
+    const response = await fetch(`${import.meta.env.VITE_API}/edit/${id}`);
+    if (response.status === 200) {
+      const note = await response.json();
+      setOldNote(note);
+    } else {
+      setRedirect(true);
+    }
   };
 
+  useEffect((_) => {
+    if (!isCreate) {
+      getOldNote();
+    }
+  }, []);
+
+  const initialValues = {
+    title: isCreate ? "" : oldNote.title,
+    content: isCreate ? "" : oldNote.content,
+    note_id: isCreate ? "" : oldNote._id,
+  };
+
+  const NoteFormSchema = Yup.object({
+    title: Yup.string()
+      .min(5, "Title is too short!")
+      .max(30, "Title is too long bby!")
+      .required("Enter a title!"),
+    content: Yup.string()
+      .min(5, "Content is too short bby!")
+      .required("Enter a Content!"),
+  });
+
   const submitHandler = async (values) => {
+    let API = `${import.meta.env.VITE_API}`;
+
     if (isCreate) {
-      const response = await fetch(`${import.meta.env.VITE_API}/create`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(values),
+      API = `${import.meta.env.VITE_API}/create`;
+    } else {
+      API = `${import.meta.env.VITE_API}/edit`;
+    }
+
+    const response = await fetch(API, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(values),
+    });
+
+    if (response.status === 201 || response.status === 200) {
+      setRedirect(true);
+    } else {
+      toast.warn("🦄 Something Went Wrong!", {
+        position: "top-right",
+        autoClose: 5000,
+        hideProgressBar: false,
+        closeOnClick: true,
+        pauseOnHover: true,
+        draggable: true,
+        progress: undefined,
+        theme: "dark",
+        transition: Bounce,
       });
-      if (response.status === 201) {
-        setRedirect(true);
-      } else {
-        toast.warn("🦄 Something Went Wrong!", {
-          position: "top-right",
-          autoClose: 5000,
-          hideProgressBar: false,
-          closeOnClick: true,
-          pauseOnHover: true,
-          draggable: true,
-          progress: undefined,
-          theme: "dark",
-          transition: Bounce,
-        });
-      }
     }
   };
 
@@ -83,6 +111,7 @@ const NoteForm = ({ isCreate }) => {
         initialValues={initialValues}
         validationSchema={NoteFormSchema}
         onSubmit={submitHandler}
+        enableReinitialize={true}
       >
         {({ errors, touched }) => (
           <Form>
@@ -112,11 +141,14 @@ const NoteForm = ({ isCreate }) => {
                 className="text-lg border-2 border-teal-600 py-1 w-full rounded-lg"
               />
             </div>
+
+            <Field type="text" name="note_id" id="note_id" hidden />
+
             <button
               className="text-white bg-teal-600 py-3 font-medium w-full text-center rounded-lg"
               type="submit"
             >
-              Save Note
+              {isCreate ? "Save Note" : "Update Note"}
             </button>
           </Form>
         )}

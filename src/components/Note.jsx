@@ -32,7 +32,7 @@ const Note = ({ note, getNotes, customAlert }) => {
             className="text-red-600"
             onClick={deleteNote}
           />
-          <Link to={"/edit/1" + _id}>
+          <Link to={"/edit/" + _id}>
             <PencilSquareIcon width={25} className="text-teal-600" />
           </Link>
           <Link to={"/notes/" + _id}>

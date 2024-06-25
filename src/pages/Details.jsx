@@ -52,7 +52,7 @@ const Details = () => {
           </div>
           <div className="border-t-4 border-t-teal-600 shadow-lg p-3 mt-4">
             <h3 className="text-3xl font-medium">{note.title}</h3>
-            <div>
+            <div className="flex gap-4 my-2">
               <p className="flex items-center gap-2 font-medium text-gray-600">
                 <UserCircleIcon className="w-5 h-5" /> {note.creator}{" "}
               </p>
