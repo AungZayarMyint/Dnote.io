@@ -1,9 +1,11 @@
-import React from "react";
+import React, { useState } from "react";
 import { ArrowUturnLeftIcon } from "@heroicons/react/24/solid";
-import { Link } from "react-router-dom";
+import { Link, Navigate } from "react-router-dom";
 import { Formik, Field, Form } from "formik";
 import * as Yup from "yup";
 import StyledErrorMessage from "./StyledErrorMessage";
+import { ToastContainer, Bounce } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 
 const NoteFormSchema = Yup.object({
   title: Yup.string()
@@ -15,18 +17,60 @@ const NoteFormSchema = Yup.object({
     .required("Enter a Content!"),
 });
 
-const submitHandler = (values) => {
-  console.log(values);
-};
-
 const NoteForm = ({ isCreate }) => {
+  const [redirect, setRedirect] = useState(false);
   const initialValues = {
     title: "",
     content: "",
   };
 
+  const submitHandler = async (values) => {
+    if (isCreate) {
+      const response = await fetch(`${import.meta.env.VITE_API}/create`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(values),
+      });
+      if (response.status === 201) {
+        setRedirect(true);
+      } else {
+        toast.warn("🦄 Something Went Wrong!", {
+          position: "top-right",
+          autoClose: 5000,
+          hideProgressBar: false,
+          closeOnClick: true,
+          pauseOnHover: true,
+          draggable: true,
+          progress: undefined,
+          theme: "dark",
+          transition: Bounce,
+        });
+      }
+    }
+  };
+
+  if (redirect) {
+    return <Navigate to={"/"} />;
+  }
+
   return (
     <section>
+      <ToastContainer
+        position="top-right"
+        autoClose={5000}
+        hideProgressBar={false}
+        newestOnTop={false}
+        closeOnClick
+        rtl={false}
+        pauseOnFocusLoss
+        draggable
+        pauseOnHover
+        theme="dark"
+        transition={Bounce}
+      />
+
       <div className="flex items-center justify-between">
         <h1 className="text-2xl font-bold mb-5">
           {isCreate ? "Create a new note.." : "Edit your note here..."}
