@@ -11,6 +11,7 @@ const NoteForm = ({ isCreate }) => {
   const [redirect, setRedirect] = useState(false);
   const [oldNote, setOldNote] = useState({});
   const [previewImg, setPreviewImg] = useState(null);
+  const [isUpload, setIsUpload] = useState(false);
   const fileRef = useRef();
 
   const { id } = useParams();
@@ -170,6 +171,7 @@ const NoteForm = ({ isCreate }) => {
                 id="content"
                 className="text-lg border-2 border-teal-600 py-1 w-full rounded-lg"
               />
+              <StyledErrorMessage name="cover_image" />
             </div>
 
             <div className="mb-3">
@@ -178,6 +180,7 @@ const NoteForm = ({ isCreate }) => {
                   Cover image
                   <span className=" text-xs font-medium ">optional</span>
                 </label>
+
                 {previewImg && (
                   <p
                     className="text-base font-medium cursor-pointer text-teal-600"
@@ -190,31 +193,68 @@ const NoteForm = ({ isCreate }) => {
                 )}
               </div>
 
-              <input
-                type="file"
-                name="cover_image"
-                hidden
-                ref={fileRef}
-                onChange={(e) => {
-                  handleImageChange(e, setFieldValue);
-                }}
-              />
+              {isUpload ? (
+                <p
+                  className="text-base font-medium cursor-pointer text-teal-600"
+                  onClick={(_) => setIsUpload(false)}
+                >
+                  upload image
+                </p>
+              ) : (
+                <p
+                  className="text-base font-medium cursor-pointer text-teal-600"
+                  onClick={(_) => setIsUpload(true)}
+                >
+                  no upload image
+                </p>
+              )}
 
-              <div
-                className="border border-teal-600 flex items-center justify-center text-teal-600 border-dashed h-96 cursor-pointer rounded-lg relative overflow-hidden"
-                onClick={() => {
-                  fileRef.current.click();
-                }}
-              >
-                <ArrowUpTrayIcon width={30} height={30} className="z-20" />
-                {previewImg && (
-                  <img
-                    src={previewImg}
-                    alt={"preview"}
-                    className="w-full absolute top-0 left-0 h-full object-cover opacity-85 z-10"
+              {isUpload && (
+                <>
+                  <input
+                    type="file"
+                    name="cover_image"
+                    hidden
+                    ref={fileRef}
+                    onChange={(e) => {
+                      handleImageChange(e, setFieldValue);
+                    }}
                   />
-                )}
-              </div>
+
+                  <div
+                    className="border border-teal-600 flex items-center justify-center text-teal-600 border-dashed h-96 cursor-pointer rounded-lg relative overflow-hidden"
+                    onClick={() => {
+                      fileRef.current.click();
+                    }}
+                  >
+                    <ArrowUpTrayIcon width={30} height={30} className="z-20" />
+
+                    {isCreate ? (
+                      <>
+                        {previewImg && (
+                          <img
+                            src={previewImg}
+                            alt={"preview"}
+                            className=" w-full absolute top-0 left-0 h-full object-cover opacity-80 z-10"
+                          />
+                        )}
+                      </>
+                    ) : (
+                      <img
+                        src={
+                          previewImg
+                            ? previewImg
+                            : `${import.meta.env.VITE_API}/${
+                                oldNote.cover_image
+                              }`
+                        }
+                        alt={"preview"}
+                        className=" w-full absolute top-0 left-0 h-full object-cover opacity-80 z-10"
+                      />
+                    )}
+                  </div>
+                </>
+              )}
 
               <StyledErrorMessage name="cover_image" />
             </div>
