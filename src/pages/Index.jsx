@@ -3,7 +3,7 @@ import Note from "../components/Note";
 import SquarePlus from "../components/SquarePlus";
 import { Comment } from "react-loader-spinner";
 
-import { ToastContainer, Bounce } from "react-toastify";
+import { ToastContainer, Bounce, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 
 const Index = () => {
