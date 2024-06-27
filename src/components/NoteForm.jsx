@@ -4,7 +4,7 @@ import { Link, Navigate, useParams } from "react-router-dom";
 import { Formik, Field, Form } from "formik";
 import * as Yup from "yup";
 import StyledErrorMessage from "./StyledErrorMessage";
-import { ToastContainer, Bounce } from "react-toastify";
+import { ToastContainer, Bounce, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 
 const NoteForm = ({ isCreate }) => {
