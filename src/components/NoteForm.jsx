@@ -19,7 +19,11 @@ const NoteForm = ({ isCreate }) => {
   const { id } = useParams();
 
   const getOldNote = async () => {
-    const response = await fetch(`${import.meta.env.VITE_API}/edit/${id}`);
+    const response = await fetch(`${import.meta.env.VITE_API}/edit/${id}`, {
+      headers: {
+        Authorization: `Bearer ${token.token}`,
+      },
+    });
     if (response.status === 200) {
       const note = await response.json();
       setOldNote(note);
@@ -28,17 +32,17 @@ const NoteForm = ({ isCreate }) => {
     }
   };
 
-  useEffect(() => {
+  useEffect((_) => {
     if (!isCreate) {
       getOldNote();
     }
-  }, [isCreate]);
+  }, []);
 
   const initialValues = {
-    title: isCreate ? "" : oldNote?.title || "",
-    content: isCreate ? "" : oldNote?.content || "",
-    note_id: isCreate ? "" : oldNote?._id || "",
-    cover_image: null, // Always start as null for the file input
+    title: isCreate ? "" : oldNote?.title,
+    content: isCreate ? "" : oldNote?.content,
+    note_id: isCreate ? "" : oldNote?._id,
+    cover_image: isCreate ? null : oldNote?.cover_image,
   };
 
   const SUPPORTED_FORMATS = ["image/png", "image/jpg", "image/jpeg"];
@@ -71,6 +75,7 @@ const NoteForm = ({ isCreate }) => {
   const clearPreviewImg = (setFieldValue) => {
     setPreviewImg(null);
     setFieldValue("cover_image", null);
+
     fileRef.current.value = "";
   };
 
@@ -90,7 +95,7 @@ const NoteForm = ({ isCreate }) => {
     formData.append("note_id", values.note_id);
 
     const response = await fetch(API, {
-      method: "POST",
+      method: "post",
       body: formData,
       headers: {
         Authorization: `Bearer ${token.token}`,
@@ -100,7 +105,7 @@ const NoteForm = ({ isCreate }) => {
     if (response.status === 201 || response.status === 200) {
       setRedirect(true);
     } else {
-      toast.warn("🦄 Something Went Wrong!", {
+      toast.error("Something went wrong!", {
         position: "top-right",
         autoClose: 5000,
         hideProgressBar: false,
@@ -108,8 +113,7 @@ const NoteForm = ({ isCreate }) => {
         pauseOnHover: true,
         draggable: true,
         progress: undefined,
-        theme: "dark",
-        transition: Bounce,
+        theme: "light",
       });
     }
   };

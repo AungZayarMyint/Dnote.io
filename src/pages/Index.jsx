@@ -90,21 +90,24 @@ const Index = () => {
           </div>
         </>
       ) : (
-        <Comment
-          visible={true}
-          height="110"
-          width="110"
-          ariaLabel="comment-loading"
-          wrapperStyle={{
-            flex: 1,
-            marginTop: 240,
-            justifyContent: "center",
-            alignItems: "center",
-          }}
-          wrapperClass="comment-wrapper"
-          color="#fff"
-          backgroundColor="#F4442E"
-        />
+        <div className="flex justify-center items-center">
+          <Comment
+            visible={true}
+            height="110"
+            width="110"
+            ariaLabel="comment-loading"
+            wrapperStyle={{
+              flex: 1,
+              marginTop: 240,
+              justifyContent: "center",
+              alignItems: "center",
+            }}
+            wrapperClass="comment-wrapper"
+            color="#fff"
+            backgroundColor="#F4442E"
+          />
+          {!loading && notes.length === 0 && <p>No notes baby!</p>}
+        </div>
       )}
 
       <ToastContainer

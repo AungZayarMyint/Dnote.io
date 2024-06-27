@@ -3,7 +3,11 @@ import { Link } from "react-router-dom";
 import { UserContext } from "../contexts/UserContext";
 
 const Nav = () => {
-  const { token } = useContext(UserContext);
+  const { token, updateToken } = useContext(UserContext);
+
+  const logoutHandler = () => {
+    updateToken(null);
+  };
 
   return (
     <nav className="bg-slate-200 py-4 px-10 mt-3">
@@ -13,9 +17,19 @@ const Nav = () => {
         </Link>
         <div className="flex gap-4">
           {token ? (
-            <Link to={"/create"} className="text-teal-600 font-medium">
-              Create Note
-            </Link>
+            <>
+              <Link to={"/create"} className="text-teal-600 font-medium">
+                Create Note
+              </Link>
+
+              <button
+                type="button"
+                className="text-teal-600 font-medium"
+                onClick={logoutHandler}
+              >
+                LogOut
+              </button>
+            </>
           ) : (
             <>
               {" "}
