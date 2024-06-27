@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from "react";
+import React, { useContext, useEffect, useRef, useState } from "react";
 import { ArrowUturnLeftIcon, ArrowUpTrayIcon } from "@heroicons/react/24/solid";
 import { Link, Navigate, useParams } from "react-router-dom";
 import { Formik, Field, Form } from "formik";
@@ -6,10 +6,12 @@ import * as Yup from "yup";
 import StyledErrorMessage from "./StyledErrorMessage";
 import { ToastContainer, Bounce, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
+import { UserContext } from "../contexts/UserContext";
 
 const NoteForm = ({ isCreate }) => {
+  const { token } = useContext(UserContext);
   const [redirect, setRedirect] = useState(false);
-  const [oldNote, setOldNote] = useState({});
+  const [oldNote, setOldNote] = useState(null); // Initialize as null
   const [previewImg, setPreviewImg] = useState(null);
   const [isUpload, setIsUpload] = useState(false);
   const fileRef = useRef();
@@ -26,17 +28,17 @@ const NoteForm = ({ isCreate }) => {
     }
   };
 
-  useEffect((_) => {
+  useEffect(() => {
     if (!isCreate) {
       getOldNote();
     }
-  }, []);
+  }, [isCreate]);
 
   const initialValues = {
-    title: isCreate ? "" : oldNote.title,
-    content: isCreate ? "" : oldNote.content,
-    note_id: isCreate ? "" : oldNote._id,
-    cover_image: isCreate ? null : oldNote.cover_image,
+    title: isCreate ? "" : oldNote?.title || "",
+    content: isCreate ? "" : oldNote?.content || "",
+    note_id: isCreate ? "" : oldNote?._id || "",
+    cover_image: null, // Always start as null for the file input
   };
 
   const SUPPORTED_FORMATS = ["image/png", "image/jpg", "image/jpeg"];
@@ -69,7 +71,6 @@ const NoteForm = ({ isCreate }) => {
   const clearPreviewImg = (setFieldValue) => {
     setPreviewImg(null);
     setFieldValue("cover_image", null);
-
     fileRef.current.value = "";
   };
 
@@ -91,6 +92,9 @@ const NoteForm = ({ isCreate }) => {
     const response = await fetch(API, {
       method: "POST",
       body: formData,
+      headers: {
+        Authorization: `Bearer ${token.token}`,
+      },
     });
 
     if (response.status === 201 || response.status === 200) {
@@ -171,7 +175,7 @@ const NoteForm = ({ isCreate }) => {
                 id="content"
                 className="text-lg border-2 border-teal-600 py-1 w-full rounded-lg"
               />
-              <StyledErrorMessage name="cover_image" />
+              <StyledErrorMessage name="content" />
             </div>
 
             <div className="mb-3">
@@ -184,9 +188,7 @@ const NoteForm = ({ isCreate }) => {
                 {previewImg && (
                   <p
                     className="text-base font-medium cursor-pointer text-teal-600"
-                    onClick={(_) => {
-                      clearPreviewImg(setFieldValue);
-                    }}
+                    onClick={() => clearPreviewImg(setFieldValue)}
                   >
                     clear
                   </p>
@@ -196,14 +198,14 @@ const NoteForm = ({ isCreate }) => {
               {isUpload ? (
                 <p
                   className="text-base font-medium cursor-pointer text-teal-600"
-                  onClick={(_) => setIsUpload(false)}
+                  onClick={() => setIsUpload(false)}
                 >
                   upload image
                 </p>
               ) : (
                 <p
                   className="text-base font-medium cursor-pointer text-teal-600"
-                  onClick={(_) => setIsUpload(true)}
+                  onClick={() => setIsUpload(true)}
                 >
                   no upload image
                 </p>
@@ -216,42 +218,26 @@ const NoteForm = ({ isCreate }) => {
                     name="cover_image"
                     hidden
                     ref={fileRef}
-                    onChange={(e) => {
-                      handleImageChange(e, setFieldValue);
-                    }}
+                    onChange={(e) => handleImageChange(e, setFieldValue)}
                   />
 
                   <div
                     className="border border-teal-600 flex items-center justify-center text-teal-600 border-dashed h-96 cursor-pointer rounded-lg relative overflow-hidden"
-                    onClick={() => {
-                      fileRef.current.click();
-                    }}
+                    onClick={() => fileRef.current.click()}
                   >
                     <ArrowUpTrayIcon width={30} height={30} className="z-20" />
 
-                    {isCreate ? (
-                      <>
-                        {previewImg && (
-                          <img
-                            src={previewImg}
-                            alt={"preview"}
-                            className=" w-full absolute top-0 left-0 h-full object-cover opacity-80 z-10"
-                          />
-                        )}
-                      </>
-                    ) : (
-                      <img
-                        src={
-                          previewImg
-                            ? previewImg
-                            : `${import.meta.env.VITE_API}/${
-                                oldNote.cover_image
-                              }`
-                        }
-                        alt={"preview"}
-                        className=" w-full absolute top-0 left-0 h-full object-cover opacity-80 z-10"
-                      />
-                    )}
+                    <img
+                      src={
+                        previewImg
+                          ? previewImg
+                          : oldNote?.cover_image
+                          ? `${import.meta.env.VITE_API}/${oldNote.cover_image}`
+                          : ""
+                      }
+                      alt="preview"
+                      className=" w-full absolute top-0 left-0 h-full object-cover opacity-80 z-10"
+                    />
                   </div>
                 </>
               )}

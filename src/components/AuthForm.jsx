@@ -1,12 +1,14 @@
-import { useState } from "react";
+import { useContext, useState } from "react";
 import { Formik, Field, Form } from "formik";
 import * as Yup from "yup";
 import StyledErrorMessage from "./StyledErrorMessage";
 import { Navigate } from "react-router-dom";
 import { ToastContainer, Bounce, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
+import { UserContext } from "../contexts/UserContext";
 
 const AuthForm = ({ isLogin }) => {
+  const { setToken } = useContext(UserContext);
   const [redirect, setRedirect] = useState(false);
 
   const initialValues = {
@@ -59,7 +61,11 @@ const AuthForm = ({ isLogin }) => {
     };
 
     const responseData = await response.json();
-    if (response.status === 201 || response.status === 200) {
+
+    if (response.status === 201) {
+      setRedirect(true);
+    } else if (response.status === 200) {
+      setToken(responseData);
       setRedirect(true);
     } else if (response.status === 400) {
       const pickedMessage = responseData.errorMessages[0].msg;
