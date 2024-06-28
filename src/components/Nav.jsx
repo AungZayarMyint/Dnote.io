@@ -43,6 +43,12 @@ const Nav = () => {
           )}
         </div>
       </div>
+
+      {token && token.user_mail && (
+        <p className="mt-3 text-teal-600 text-right">
+          Login as -<span> {token.user_mail} </span>
+        </p>
+      )}
     </nav>
   );
 };

@@ -7,6 +7,8 @@ import {
 import { Link } from "react-router-dom";
 import { formatISO9075 } from "date-fns";
 import { UserContext } from "../contexts/UserContext";
+import { ToastContainer, Bounce, toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 
 const Note = ({ note, getNotes, customAlert }) => {
   const { token } = useContext(UserContext);
@@ -14,14 +16,17 @@ const Note = ({ note, getNotes, customAlert }) => {
 
   const deleteNote = async () => {
     const response = await fetch(`${import.meta.env.VITE_API}/delete/${_id}`, {
-      method: "DELETE",
+      method: "delete",
       headers: {
         Authorization: `Bearer ${token.token}`,
       },
     });
+
     if (response.status === 204) {
       getNotes();
       customAlert("Post Deleted!");
+    } else {
+      alert("You are not the creator, MOTHERFUCKER!");
     }
   };
 
@@ -32,17 +37,25 @@ const Note = ({ note, getNotes, customAlert }) => {
       <div className="flex items-center justify-between gap-2 mt-3 border-t">
         <p>{formatISO9075(new Date(createdAt))}</p>
         <div className="flex items-center justify-end gap-2 mt-3">
-          <ArchiveBoxXMarkIcon
-            width={25}
-            className="text-red-600 cursor-pointer"
-            onClick={deleteNote}
-          />
-          <Link to={"/edit/" + _id}>
-            <PencilSquareIcon
-              width={25}
-              className="text-teal-600 cursor-pointer"
-            />
-          </Link>
+          {token && (
+            <>
+              {note.creator.toString() === token.userId && (
+                <>
+                  <ArchiveBoxXMarkIcon
+                    width={25}
+                    className="text-red-600 cursor-pointer"
+                    onClick={deleteNote}
+                  />
+                  <Link to={"/edit/" + _id}>
+                    <PencilSquareIcon
+                      width={25}
+                      className="text-teal-600 cursor-pointer"
+                    />
+                  </Link>
+                </>
+              )}
+            </>
+          )}
           <Link to={"/notes/" + _id}>
             <EyeIcon width={25} className="text-gray-500 cursor-pointer" />
           </Link>
